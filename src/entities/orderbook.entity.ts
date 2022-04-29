@@ -17,7 +17,7 @@ export class Orderbook {
   orderType: string;
 
   @Column({ name: 'account_no' })
-  accountNo: number;
+  accountNo: string;
 
   @Column({ name: 'price', type: 'decimal' })
   price: number;
