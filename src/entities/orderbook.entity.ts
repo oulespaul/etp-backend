@@ -19,13 +19,18 @@ export class Orderbook {
   @Column({ name: 'account_no' })
   accountNo: string;
 
-  @Column({ name: 'price', type: 'decimal' })
+  @Column({ name: 'price', type: 'decimal', precision: 10, scale: 2 })
   price: number;
 
-  @Column({ name: 'quantity', type: 'decimal' })
+  @Column({ name: 'quantity', type: 'decimal', precision: 10, scale: 2 })
   quantity: number;
 
-  @Column({ name: 'remaining_quantity', type: 'decimal' })
+  @Column({
+    name: 'remaining_quantity',
+    type: 'decimal',
+    precision: 10,
+    scale: 2,
+  })
   remainingQuantity: number;
 
   @Column({ name: 'status', default: 'working' })
