@@ -9,8 +9,8 @@ export class CreateOrderbookDto {
   @IsNotEmpty()
   orderType: string;
 
-  @IsNumber()
-  accountNo: number;
+  @IsString()
+  accountNo: string;
 
   @IsNumber()
   price: number;

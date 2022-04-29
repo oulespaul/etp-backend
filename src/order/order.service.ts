@@ -17,7 +17,7 @@ export class OrderbookService {
     return this.orderbookRepository.save(newOrder);
   }
 
-  findOrdersByPrice(price: number, side: string, accountNo: number) {
+  findOrdersByPrice(price: number, side: string, accountNo: string) {
     return this.orderbookRepository.find({
       where: {
         price,
