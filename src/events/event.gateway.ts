@@ -11,7 +11,9 @@ import {
 import { Server, Socket } from 'socket.io';
 import { CreateOrderbookDto } from 'src/order/dto/create-order.dto';
 import { OrderbookService } from 'src/order/order.service';
-
+import { LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
+import * as dayjs from 'dayjs';
+import { GetOrderbookDto } from 'src/order/dto/get-order.dto';
 @WebSocketGateway(3001, {
   cors: {
     origin: '*',
@@ -47,10 +49,25 @@ export class EventGateway
     try {
       let quantityTmp = data.quantity;
       const side = data.side === 'buy' ? 'sell' : 'buy';
+      const whereSide =
+        side === 'buy'
+          ? MoreThanOrEqual(data.price)
+          : LessThanOrEqual(data.price);
+      const startOrderTime = dayjs(data.orderTime)
+        .set('minute', 0)
+        .set('second', 0)
+        .toString();
+      const endOrderTime = dayjs(data.orderTime)
+        .set('minute', 59)
+        .set('second', 59)
+        .toString();
+
       const orderbooks = await this.orderbookService.findOrdersByPrice(
-        data.price,
+        whereSide,
         side,
         data.accountNo,
+        startOrderTime,
+        endOrderTime,
       );
 
       orderbooks.forEach(async (orderbook) => {
@@ -74,19 +91,28 @@ export class EventGateway
         status: quantityTmp == 0 ? 'fullyExecuted' : 'working',
       });
 
-      this.getOrderbook();
+      const startTime = dayjs().set('minute', 0).set('second', 0).toString();
+      const endTime = dayjs().set('minute', 59).set('second', 59).toString();
+      this.getOrderbook({ startTime, endTime });
     } catch (err) {
       this.server.emit('newOrder', err.message);
     }
   }
 
   @SubscribeMessage('getOrderbook')
-  async getOrderbook() {
+  async getOrderbook(
+    @MessageBody()
+    data: GetOrderbookDto,
+  ) {
     try {
-      const orderBooks = await this.orderbookService.findOrderbook();
+      const orderBooks = await this.orderbookService.findOrderbook(
+        new Date(data.startTime),
+        new Date(data.endTime),
+      );
 
       this.server.emit('orderBooks', JSON.stringify(orderBooks));
     } catch (err) {
+      console.log('err.message', err.message);
       this.server.emit('orderBooks', err.message);
     }
   }

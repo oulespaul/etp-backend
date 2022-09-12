@@ -7,5 +7,5 @@
   "database": "etp",
   "entities": ["dist/**/*.entity{.ts,.js}"],
   "synchronize": true,
-  "logger": "debug"
+  "logging": false
 }

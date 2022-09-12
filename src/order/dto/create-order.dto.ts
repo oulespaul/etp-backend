@@ -25,4 +25,7 @@ export class CreateOrderbookDto {
   @IsString()
   @IsOptional()
   status?: string;
+
+  @IsOptional()
+  orderTime?: Date;
 }
