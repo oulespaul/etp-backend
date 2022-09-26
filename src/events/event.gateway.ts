@@ -14,6 +14,7 @@ import { OrderbookService } from 'src/order/order.service';
 import { LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
 import * as dayjs from 'dayjs';
 import { GetOrderbookDto } from 'src/order/dto/get-order.dto';
+import { TradeService } from 'src/trade/trade.service';
 @WebSocketGateway(3001, {
   cors: {
     origin: '*',
@@ -24,7 +25,10 @@ export class EventGateway
 {
   private logger: Logger = new Logger('EventGateway');
 
-  constructor(private orderbookService: OrderbookService) {}
+  constructor(
+    private orderbookService: OrderbookService,
+    private tradebokService: TradeService,
+  ) {}
 
   afterInit(server: any) {
     this.logger.log('Initialized');
@@ -82,6 +86,22 @@ export class EventGateway
           ...orderbook,
           remainingQuantity: isFullyExecuted ? 0 : qtyLeft,
           status: isFullyExecuted ? 'fullyExecuted' : 'working',
+        });
+
+        const matchedQty = orderbook.remainingQuantity - qtyLeft;
+
+        await this.tradebokService.createTrade({
+          incomingAccountNo: data.accountNo,
+          bookOrderAccountNo: orderbook.accountNo,
+          bookOrderId: orderbook.order_id,
+          quantity: matchedQty,
+          price: orderbook.price,
+          tradeTime: new Date(),
+          incomingOrderSide: data.side,
+          bookOrderSide: orderbook.side,
+          incomingOrderRemainingQuantity: quantityTmp,
+          bookOrderRemainingQuantity: isFullyExecuted ? 0 : qtyLeft,
+          status: 'Matched',
         });
       });
 

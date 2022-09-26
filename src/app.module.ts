@@ -1,11 +1,10 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { EventModule } from './events/event.module';
 import { OrderbookModule } from './order/order.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ClearingOrderTaskService } from './services/clearing-orderbook.service';
+import { TradeModule } from './trade/trade.module';
 
 @Module({
   imports: [
@@ -13,8 +12,8 @@ import { ClearingOrderTaskService } from './services/clearing-orderbook.service'
     ScheduleModule.forRoot(),
     EventModule,
     OrderbookModule,
+    TradeModule,
   ],
-  controllers: [AppController],
-  providers: [AppService, ClearingOrderTaskService],
+  providers: [ClearingOrderTaskService],
 })
 export class AppModule {}
