@@ -1,5 +1,13 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Get,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
+import { ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiKeyAuthGuard } from 'src/auth/guard/apikey-auth.guard';
 import { TradebookConfirmation } from 'src/entities/tradebook-confirmation.entity';
 import { Tradebook } from 'src/entities/tradebook.entity';
 import { ComfirmTradebookDto } from './dto/confirm-trade.dto';
@@ -15,10 +23,26 @@ export class TradeController {
     return this.tradeService.getAllTrade();
   }
 
+  @UseGuards(ApiKeyAuthGuard)
   @Post('/confirm')
+  @ApiResponse({
+    status: 200,
+    schema: {
+      example: {
+        status: 'COMPLETE',
+        timestamp: '2022-10-17T02:02:13.874Z',
+      },
+    },
+  })
   async confirm(
     @Body() confirmDto: ComfirmTradebookDto,
-  ): Promise<TradebookConfirmation> {
+  ): Promise<{ status: string; timestamp: Date }> {
+    if (!confirmDto.transactionId.startsWith('OB')) {
+      throw new BadRequestException('transactionId must be start with OB');
+    }
+    if (!confirmDto.refId.startsWith('TB')) {
+      throw new BadRequestException('transactionId must be start with TB');
+    }
     return this.tradeService.createTradeConfirmation(confirmDto);
   }
 }

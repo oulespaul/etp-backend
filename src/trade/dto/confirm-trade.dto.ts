@@ -6,7 +6,7 @@ export class ComfirmTradebookDto {
   @ApiProperty({
     type: String,
     description: 'Match Id: This is a required property',
-    example: 'OB0001',
+    example: 'OB1',
   })
   @IsString()
   transactionId: string;
@@ -14,7 +14,7 @@ export class ComfirmTradebookDto {
   @ApiProperty({
     type: String,
     description: 'Uniq Id for reference: This is a required property',
-    example: 'TB0001',
+    example: 'TB1',
   })
   @IsString()
   refId: string;

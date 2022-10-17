@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { TradebookConfirmation } from 'src/entities/tradebook-confirmation.entity';
 import { Tradebook } from 'src/entities/tradebook.entity';
@@ -35,15 +31,28 @@ export class TradeService {
 
   async createTradeConfirmation(
     confirmTrade: ComfirmTradebookDto,
-  ): Promise<TradebookConfirmation> {
-    const tradeId = Number(confirmTrade.refId.split('TB-')[1]);
+  ): Promise<{ status: string; timestamp: Date }> {
+    const tradeId = Number(confirmTrade.refId.split('TB')[1]);
     const tradebook = await this.getTradeById(tradeId);
     if (tradebook === undefined) {
       throw new BadRequestException('refId not found');
     }
 
+    const tradebookConfirmationExited =
+      await this.tradebookConfirmationRepository.find({
+        where: [
+          {
+            tradebookId: tradeId,
+          },
+        ],
+      });
+
+    if (tradebookConfirmationExited.length > 0) {
+      throw new BadRequestException(`refId ${tradeId} has already confirmed`);
+    }
+
     const tradebookConfirmation = this.tradebookConfirmationRepository.create({
-      orderbookId: Number(confirmTrade.transactionId.split('OB-')[1]),
+      orderbookId: Number(confirmTrade.transactionId.split('OB')[1]),
       tradebookId: tradeId,
       status: confirmTrade.status,
       trnUsage: confirmTrade.trnUsage,
@@ -51,6 +60,13 @@ export class TradeService {
       timestamp: new Date(confirmTrade.timestamp),
     });
 
-    return this.tradebookConfirmationRepository.save(tradebookConfirmation);
+    const tradeConfirmed = await this.tradebookConfirmationRepository.save(
+      tradebookConfirmation,
+    );
+
+    return {
+      status: tradeConfirmed.status,
+      timestamp: tradeConfirmed.timestamp,
+    };
   }
 }

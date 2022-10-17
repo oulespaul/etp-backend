@@ -5,6 +5,8 @@ import { OrderbookModule } from './order/order.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ClearingOrderTaskService } from './services/clearing-orderbook.service';
 import { TradeModule } from './trade/trade.module';
+import { AuthService } from './auth/auth.service';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -13,7 +15,8 @@ import { TradeModule } from './trade/trade.module';
     EventModule,
     OrderbookModule,
     TradeModule,
+    AuthModule,
   ],
-  providers: [ClearingOrderTaskService],
+  providers: [ClearingOrderTaskService, AuthService],
 })
 export class AppModule {}
