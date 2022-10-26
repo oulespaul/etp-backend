@@ -42,4 +42,7 @@ export class Tradebook {
 
   @Column({ name: 'status' })
   status: string;
+
+  @Column({ name: 'is_trade_requested' })
+  isTradeRequest: boolean;
 }

@@ -7,6 +7,9 @@ import { ClearingOrderTaskService } from './services/clearing-orderbook.service'
 import { TradeModule } from './trade/trade.module';
 import { AuthService } from './auth/auth.service';
 import { AuthModule } from './auth/auth.module';
+import { TradeRequestService } from './services/trade-request.service';
+import { ESPService } from './services/esp.service';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [
@@ -16,7 +19,13 @@ import { AuthModule } from './auth/auth.module';
     OrderbookModule,
     TradeModule,
     AuthModule,
+    HttpModule,
   ],
-  providers: [ClearingOrderTaskService, AuthService],
+  providers: [
+    ClearingOrderTaskService,
+    AuthService,
+    TradeRequestService,
+    ESPService,
+  ],
 })
 export class AppModule {}

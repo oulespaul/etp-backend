@@ -3,12 +3,12 @@ import {
   Body,
   Controller,
   Get,
+  HttpCode,
   Post,
   UseGuards,
 } from '@nestjs/common';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ApiKeyAuthGuard } from 'src/auth/guard/apikey-auth.guard';
-import { TradebookConfirmation } from 'src/entities/tradebook-confirmation.entity';
 import { Tradebook } from 'src/entities/tradebook.entity';
 import { ComfirmTradebookDto } from './dto/confirm-trade.dto';
 import { TradeService } from './trade.service';
@@ -34,6 +34,7 @@ export class TradeController {
       },
     },
   })
+  @HttpCode(200)
   async confirm(
     @Body() confirmDto: ComfirmTradebookDto,
   ): Promise<{ status: string; timestamp: Date }> {
