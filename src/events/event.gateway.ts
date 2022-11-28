@@ -113,6 +113,9 @@ export class EventGateway
 
       const startTime = dayjs().set('minute', 0).set('second', 0).toString();
       const endTime = dayjs().set('minute', 59).set('second', 59).toString();
+      const sessions = await this.tradebokService.getSessionTrade();
+
+      this.server.emit('sessions', sessions);
       this.getOrderbook({ startTime, endTime });
     } catch (err) {
       this.server.emit('newOrder', err.message);
@@ -134,6 +137,17 @@ export class EventGateway
     } catch (err) {
       console.log('err.message', err.message);
       this.server.emit('orderBooks', err.message);
+    }
+  }
+
+  @SubscribeMessage('getSession')
+  async getSession() {
+    try {
+      const sessions = await this.tradebokService.getSessionTrade();
+
+      this.server.emit('sessions', JSON.stringify(sessions));
+    } catch (err) {
+      this.server.emit('sessions', err.message);
     }
   }
 }

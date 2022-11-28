@@ -5,7 +5,8 @@ import { Tradebook } from 'src/entities/tradebook.entity';
 import { FindOperator, Repository } from 'typeorm';
 import { ComfirmTradebookDto } from './dto/confirm-trade.dto';
 import { CreateTradebookDto } from './dto/create-trade.dto';
-
+import { getSessionSql } from '../helpers/trade/sql/getSession';
+import { TradeSessionResponseDto } from './dto/trade-session-response';
 @Injectable()
 export class TradeService {
   constructor(
@@ -94,5 +95,9 @@ export class TradeService {
     tradebook.isTradeRequest = true;
 
     return this.tradebookRepository.save(tradebook);
+  }
+
+  async getSessionTrade(): Promise<TradeSessionResponseDto[]> {
+    return this.tradebookRepository.query(getSessionSql);
   }
 }
