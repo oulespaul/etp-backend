@@ -100,4 +100,18 @@ export class TradeService {
   async getSessionTrade(): Promise<TradeSessionResponseDto[]> {
     return this.tradebookRepository.query(getSessionSql);
   }
+
+  async getMonthlyTradeConfirmation() {
+    return this.tradebookConfirmationRepository
+      .createQueryBuilder('tc')
+      .select('t.incoming_account_no', 'accountNo')
+      .addSelect('SUM(tc.trn_usage)', 'trnUsage')
+      .addSelect('SUM(tc.trn_usage * t.price)', 'price')
+      .leftJoin('tradebook', 't', 'tc.tradebook_id = t.trade_id')
+      .where('YEAR(tc.`timestamp`) = YEAR(NOW())')
+      .andWhere('MONTH(tc.`timestamp`) = MONTH(NOW())')
+      .andWhere('t.incoming_account_no = :accountNo', { accountNo: 10050307 })
+      .groupBy('t.incoming_account_no')
+      .getRawOne();
+  }
 }
