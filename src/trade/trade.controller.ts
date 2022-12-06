@@ -108,7 +108,7 @@ export class TradeController {
         {
           task: 'รวมเงินที่ต้องชำระ (บาท)',
           amount: formatNumber(
-            Number(tradeMonthly.price) + tradeMonthly.price * 0.07,
+            Number(tradeMonthly.price) + tradeMonthly.price * 0.07 + 100,
           ),
         },
       ],
