@@ -101,7 +101,7 @@ export class TradeService {
     return this.tradebookRepository.query(getSessionSql);
   }
 
-  async getMonthlyTradeConfirmation() {
+  async getMonthlyTradeConfirmation(accountNo: number) {
     return this.tradebookConfirmationRepository
       .createQueryBuilder('tc')
       .select('t.incoming_account_no', 'accountNo')
@@ -110,7 +110,7 @@ export class TradeService {
       .leftJoin('tradebook', 't', 'tc.tradebook_id = t.trade_id')
       .where('YEAR(tc.`timestamp`) = YEAR(NOW())')
       .andWhere('MONTH(tc.`timestamp`) = MONTH(NOW())')
-      .andWhere('t.incoming_account_no = :accountNo', { accountNo: 10050307 })
+      .andWhere('t.incoming_account_no = :accountNo', { accountNo })
       .groupBy('t.incoming_account_no')
       .getRawOne();
   }

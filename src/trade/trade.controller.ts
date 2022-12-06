@@ -7,6 +7,7 @@ import {
   Post,
   UseGuards,
   Response,
+  Param,
 } from '@nestjs/common';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ApiKeyAuthGuard } from 'src/auth/guard/apikey-auth.guard';
@@ -54,9 +55,14 @@ export class TradeController {
     return this.tradeService.createTradeConfirmation(confirmDto);
   }
 
-  @Get('/invoice')
-  async getInvoice(@Response() res: Res) {
-    const tradeMonthly = await this.tradeService.getMonthlyTradeConfirmation();
+  @Get('/invoice/:accountNo')
+  async getInvoice(
+    @Param('accountNo') accountNo: number,
+    @Response() res: Res,
+  ) {
+    const tradeMonthly = await this.tradeService.getMonthlyTradeConfirmation(
+      accountNo,
+    );
     if (!tradeMonthly) {
       throw new BadRequestException('Not found any trade confirmation');
     }
