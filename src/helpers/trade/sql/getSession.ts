@@ -9,14 +9,14 @@ SELECT
 	FROM
 		tradebook t1
 	WHERE
-		t1.trade_time = t.min_time) as openPrice,
+		t1.trade_time = t.min_time LIMIT 1) as openPrice,
 			(
 	SELECT
 		price
 	FROM
 		tradebook t1
 	WHERE
-		t1.trade_time = t.max_time) as closePrice
+		t1.trade_time = t.max_time LIMIT 1) as closePrice
 FROM
 	(
 	SELECT
