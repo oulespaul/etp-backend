@@ -7,6 +7,9 @@ import { ComfirmTradebookDto } from './dto/confirm-trade.dto';
 import { CreateTradebookDto } from './dto/create-trade.dto';
 import { getSessionSql } from '../helpers/trade/sql/getSession';
 import { TradeSessionResponseDto } from './dto/trade-session-response';
+import { getTradeConfirmationWithTradeDetail } from 'src/helpers/trade/sql/getTradeConfirmWithTradeDetail';
+import { TradeConfirmationWithDetailDto } from './dto/trade-confirmation-with-detail.dto';
+
 @Injectable()
 export class TradeService {
   constructor(
@@ -113,5 +116,29 @@ export class TradeService {
       .andWhere('t.incoming_account_no = :accountNo', { accountNo })
       .groupBy('t.incoming_account_no')
       .getRawOne();
+  }
+
+  async getUnStampBlockTradeConfirmation(): Promise<
+    TradeConfirmationWithDetailDto[]
+  > {
+    return this.tradebookConfirmationRepository.query(
+      getTradeConfirmationWithTradeDetail,
+    );
+  }
+
+  async updateTradeConfirmationStampBlock(
+    tradeId: number,
+  ): Promise<TradebookConfirmation> {
+    const tradebook = await this.tradebookConfirmationRepository.findOne(
+      tradeId,
+    );
+
+    if (tradebook === undefined) {
+      throw new BadRequestException('tradeConfirmationId not found');
+    }
+
+    tradebook.isStampBlock = true;
+
+    return this.tradebookConfirmationRepository.save(tradebook);
   }
 }

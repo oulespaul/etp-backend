@@ -22,4 +22,7 @@ export class TradebookConfirmation {
 
   @Column({ name: 'timestamp' })
   timestamp: Date;
+
+  @Column({ name: 'is_stamp_blocked', default: false })
+  isStampBlock: boolean;
 }

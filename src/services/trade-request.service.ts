@@ -4,12 +4,14 @@ import * as dayjs from 'dayjs';
 import { Between } from 'typeorm';
 import { TradeService } from 'src/trade/trade.service';
 import { ESPService } from './esp.service';
+import { BlockchainService } from './blockchain.service';
 
 @Injectable()
 export class TradeRequestService {
   constructor(
     private tradeService: TradeService,
     private espService: ESPService,
+    private blockchainService: BlockchainService,
   ) {}
 
   private readonly logger = new Logger(TradeRequestService.name);
@@ -48,6 +50,40 @@ export class TradeRequestService {
 
         if (result.data) {
           this.tradeService.updateTradeRequested(trade.tradeId);
+        }
+      }),
+    );
+  }
+
+  @Cron('*/5 * * * * *')
+  async handleStampToBlockchainCron() {
+    this.logger.debug(`Starting stamp blockchain`);
+
+    const tradeConfirmationList =
+      await this.tradeService.getUnStampBlockTradeConfirmation();
+
+    if (tradeConfirmationList.length === 0) {
+      return this.logger.debug(`TradeConfirmationList is empty for stamp`);
+    }
+
+    await Promise.all(
+      tradeConfirmationList.map(async (trade) => {
+        const req = {
+          user_id: trade.userId,
+          transaction_id: `OB${trade.transactionId}`,
+          ref_id: `TB${trade.refId}`,
+          transaction_status: trade.status,
+          trn_usage: trade.trnUsage,
+          trade_total: trade.tradeTotal,
+          time_stamp: Math.floor(trade.timestamp.getTime() / 1000),
+        };
+
+        const result = await this.blockchainService.stampToBlockchain(req);
+
+        if (result.data && result.data.code === 1) {
+          this.tradeService.updateTradeConfirmationStampBlock(
+            trade.tradeConfirmationId,
+          );
         }
       }),
     );

@@ -11,6 +11,7 @@ import { TradeRequestService } from './services/trade-request.service';
 import { ESPService } from './services/esp.service';
 import { HttpModule } from '@nestjs/axios';
 import { UserModule } from './user/user.module';
+import { BlockchainService } from './services/blockchain.service';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { UserModule } from './user/user.module';
     AuthService,
     TradeRequestService,
     ESPService,
+    BlockchainService,
   ],
 })
 export class AppModule {}
