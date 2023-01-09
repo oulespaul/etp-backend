@@ -5,7 +5,9 @@ import { Tradebook } from 'src/entities/tradebook.entity';
 import { FindOperator, Repository } from 'typeorm';
 import { ComfirmTradebookDto } from './dto/confirm-trade.dto';
 import { CreateTradebookDto } from './dto/create-trade.dto';
-import { getSessionSql } from '../helpers/trade/sql/getSession';
+import { getSessionSqlHour } from '../helpers/trade/sql/getSessionHour';
+import { getSessionSqlDay } from '../helpers/trade/sql/getSessionDay';
+import { getSessionSqlMonth } from '../helpers/trade/sql/getSessionMonth';
 import { TradeSessionResponseDto } from './dto/trade-session-response';
 import { getTradeConfirmationWithTradeDetail } from 'src/helpers/trade/sql/getTradeConfirmWithTradeDetail';
 import { TradeConfirmationWithDetailDto } from './dto/trade-confirmation-with-detail.dto';
@@ -100,8 +102,17 @@ export class TradeService {
     return this.tradebookRepository.save(tradebook);
   }
 
-  async getSessionTrade(): Promise<TradeSessionResponseDto[]> {
-    return this.tradebookRepository.query(getSessionSql);
+  async getSessionTrade(
+    timeframe = 'hour',
+  ): Promise<TradeSessionResponseDto[]> {
+    const sessionSqlMap = {
+      hour: getSessionSqlHour,
+      day: getSessionSqlDay,
+      month: getSessionSqlMonth,
+    };
+    const sql = sessionSqlMap[timeframe];
+
+    return this.tradebookRepository.query(sql);
   }
 
   async getMonthlyTradeConfirmation(accountNo: number) {

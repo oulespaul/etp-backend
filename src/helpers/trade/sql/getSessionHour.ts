@@ -1,4 +1,4 @@
-export const getSessionSql = `
+export const getSessionSqlHour = `
 SELECT
 	t.date_time as tradeTime,
 	t.low_price as lowPrice,

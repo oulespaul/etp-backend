@@ -141,9 +141,9 @@ export class EventGateway
   }
 
   @SubscribeMessage('getSession')
-  async getSession() {
+  async getSession(@MessageBody() timeframe: string) {
     try {
-      const sessions = await this.tradebokService.getSessionTrade();
+      const sessions = await this.tradebokService.getSessionTrade(timeframe);
 
       this.server.emit('sessions', JSON.stringify(sessions));
     } catch (err) {
