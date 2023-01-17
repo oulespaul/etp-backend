@@ -30,4 +30,6 @@ FROM
 	WHERE trade_time >= NOW() - INTERVAL 1 DAY
 	GROUP BY
 		DATE(trade_time), HOUR(trade_time)) t
+ORDER BY
+	t.date_time
 `;
