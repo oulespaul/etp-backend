@@ -29,7 +29,7 @@ FROM
 		tradebook
 	WHERE trade_time >= NOW() - INTERVAL 365 DAY
 	GROUP BY
-		MONTH(trade_time)) t
-ORDER BY
-	t.date_time
+		MONTH(trade_time)
+	ORDER BY trade_time
+	) t
 `;
