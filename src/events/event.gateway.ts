@@ -90,10 +90,17 @@ export class EventGateway
 
         const matchedQty = orderbook.remainingQuantity - qtyLeft;
 
+        const incomingOrder = await this.orderbookService.create({
+          ...data,
+          remainingQuantity: quantityTmp,
+          status: quantityTmp == 0 ? 'fullyExecuted' : 'working',
+        });
+
         await this.tradebokService.createTrade({
           incomingAccountNo: data.accountNo,
           bookOrderAccountNo: orderbook.accountNo,
           bookOrderId: orderbook.order_id,
+          incomingOrderId: incomingOrder.order_id,
           quantity: matchedQty,
           price: orderbook.price,
           tradeTime: new Date(),
@@ -103,12 +110,6 @@ export class EventGateway
           bookOrderRemainingQuantity: isFullyExecuted ? 0 : qtyLeft,
           status: 'Matched',
         });
-      });
-
-      await this.orderbookService.create({
-        ...data,
-        remainingQuantity: quantityTmp,
-        status: quantityTmp == 0 ? 'fullyExecuted' : 'working',
       });
 
       const startTime = dayjs().set('minute', 0).set('second', 0).toString();

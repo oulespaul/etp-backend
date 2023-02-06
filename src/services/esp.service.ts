@@ -10,17 +10,22 @@ export class ESPService {
 
   async tradeRequest(reqBody: TradeRequestDto): Promise<any> {
     this.logger.debug(`Trade request with ${JSON.stringify(reqBody)}`);
-    return this.httpService
-      .post(
-        'http://esp-pv.com/BcgWebApi/api/TradeRequest?id=10051001',
-        JSON.stringify(reqBody),
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            ApiKey: '4iEJxzq0zirF7yvhtT2xjt',
+    try {
+      return this.httpService
+        .post(
+          'http://esp-pv.com/BcgWebApi/api/TradeRequest?id=10051001',
+          JSON.stringify(reqBody),
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              ApiKey: '4iEJxzq0zirF7yvhtT2xjt',
+            },
           },
-        },
-      )
-      .toPromise();
+        )
+        .toPromise();
+    } catch (error) {
+      this.logger.error(`Trade request error: ${error}`);
+      return null;
+    }
   }
 }

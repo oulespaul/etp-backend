@@ -41,23 +41,11 @@ export class TradeService {
   async createTradeConfirmation(
     confirmTrade: ComfirmTradebookDto,
   ): Promise<{ status: string; timestamp: Date }> {
-    const tradeId = Number(confirmTrade.refId.split('TB')[1]);
+    const tradeRefId = confirmTrade.refId.split('|')[0];
+    const tradeId = Number(tradeRefId.split('TB')[1]);
     const tradebook = await this.getTradeById(tradeId);
     if (tradebook === undefined) {
       throw new BadRequestException('refId not found');
-    }
-
-    const tradebookConfirmationExited =
-      await this.tradebookConfirmationRepository.find({
-        where: [
-          {
-            tradebookId: tradeId,
-          },
-        ],
-      });
-
-    if (tradebookConfirmationExited.length > 0) {
-      throw new BadRequestException(`refId ${tradeId} has already confirmed`);
     }
 
     const tradebookConfirmation = this.tradebookConfirmationRepository.create({

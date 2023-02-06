@@ -19,6 +19,9 @@ export class Tradebook {
   @Column({ name: 'book_order_id' })
   bookOrderId: number;
 
+  @Column({ name: 'incoming_order_id' })
+  incomingOrderId: number;
+
   @Column({ name: 'quantity', type: 'decimal', precision: 10, scale: 2 })
   quantity: number;
 

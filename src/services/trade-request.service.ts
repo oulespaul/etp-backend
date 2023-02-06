@@ -35,20 +35,37 @@ export class TradeRequestService {
 
     await Promise.all(
       trades.map(async (trade) => {
-        const req = {
+        const reqTaker = {
           clientId: parseInt(trade.incomingAccountNo),
           transactionDateTime: nextHour,
           tradeType: trade.incomingOrderSide === 'buy' ? 10 : 20,
-          transactionId: `OB${trade.bookOrderId}`,
-          refId: `TB${trade.tradeId}`,
+          transactionId: `OB${trade.incomingOrderId}`,
+          refId: `TB${trade.tradeId}|OB${trade.incomingOrderId}`,
           duration: 60,
           volume: parseFloat(trade.quantity.toString()),
           unitPrice: parseFloat(trade.price.toString()),
         };
 
-        const result = await this.espService.tradeRequest(req);
+        const resultTaker = await this.espService.tradeRequest(reqTaker);
 
-        if (result.data) {
+        if (!resultTaker) {
+          return this.logger.debug(`TradeConfirmation taker is error`);
+        }
+
+        const reqMaker = {
+          clientId: parseInt(trade.bookOrderAccountNo),
+          transactionDateTime: nextHour,
+          tradeType: trade.incomingOrderSide === 'buy' ? 20 : 10,
+          transactionId: `OB${trade.bookOrderId}`,
+          refId: `TB${trade.tradeId}|OB${trade.bookOrderId}`,
+          duration: 60,
+          volume: parseFloat(trade.quantity.toString()),
+          unitPrice: parseFloat(trade.price.toString()),
+        };
+
+        const resultMaker = await this.espService.tradeRequest(reqMaker);
+
+        if (resultMaker && resultMaker.data) {
           this.tradeService.updateTradeRequested(trade.tradeId);
         }
       }),
