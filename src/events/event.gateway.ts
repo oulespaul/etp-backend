@@ -103,7 +103,7 @@ export class EventGateway
           incomingOrderId: incomingOrder.order_id,
           quantity: matchedQty,
           price: orderbook.price,
-          tradeTime: new Date(),
+          tradeTime: incomingOrder.orderTime,
           incomingOrderSide: data.side,
           bookOrderSide: orderbook.side,
           incomingOrderRemainingQuantity: quantityTmp,
@@ -112,6 +112,14 @@ export class EventGateway
         });
       });
 
+      if (orderbooks.length < 1) {
+        await this.orderbookService.create({
+          ...data,
+          remainingQuantity: quantityTmp,
+          status: quantityTmp == 0 ? 'fullyExecuted' : 'working',
+        });
+      }
+
       const startTime = dayjs().set('minute', 0).set('second', 0).toString();
       const endTime = dayjs().set('minute', 59).set('second', 59).toString();
       const sessions = await this.tradebokService.getSessionTrade();
@@ -119,6 +127,7 @@ export class EventGateway
       this.server.emit('sessions', sessions);
       this.getOrderbook({ startTime, endTime });
     } catch (err) {
+      console.log('da: err', err);
       this.server.emit('newOrder', err.message);
     }
   }
@@ -133,7 +142,6 @@ export class EventGateway
         new Date(data.startTime),
         new Date(data.endTime),
       );
-
       this.server.emit('orderBooks', JSON.stringify(orderBooks));
     } catch (err) {
       console.log('err.message', err.message);
