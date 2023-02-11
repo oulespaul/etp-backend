@@ -27,7 +27,7 @@ FROM
 		max(trade_time) as max_time
 	FROM
 		tradebook
-	WHERE trade_time >= NOW() - INTERVAL 365 DAY
+	WHERE trade_time >= NOW() - INTERVAL 365 DAY AND trade_time <= NOW()
 	GROUP BY
 		MONTH(trade_time)
 	ORDER BY trade_time

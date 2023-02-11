@@ -27,7 +27,7 @@ FROM
 		max(trade_time) as max_time
 	FROM
 		tradebook
-	WHERE trade_time >= NOW() - INTERVAL 1 DAY
+	WHERE trade_time >= NOW() - INTERVAL 1 DAY AND trade_time <= NOW()
 	GROUP BY
 		DATE(trade_time), HOUR(trade_time)
 	ORDER BY trade_time
