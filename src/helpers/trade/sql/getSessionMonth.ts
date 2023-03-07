@@ -20,7 +20,7 @@ SELECT
 FROM
 	(
 	SELECT
-		DATE_FORMAT(trade_time, '%m-%Y') date_time,
+		trade_time as date_time,
 		MIN(price) as low_price,
 		MAX(price) as high_price,
 		min(trade_time) as min_time,

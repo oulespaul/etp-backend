@@ -159,4 +159,17 @@ export class EventGateway
       this.server.emit('sessions', err.message);
     }
   }
+
+  @SubscribeMessage('getMarketSummaryData')
+  async getMarketSummaryData(@MessageBody() timeframe: string) {
+    try {
+      const marketSummary = await this.tradebokService.getMarketSummaryData(
+        timeframe,
+      );
+
+      this.server.emit('marketSummary', JSON.stringify(marketSummary));
+    } catch (err) {
+      this.server.emit('marketSummary', err.message);
+    }
+  }
 }

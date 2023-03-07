@@ -11,6 +11,7 @@ import { getSessionSqlMonth } from '../helpers/trade/sql/getSessionMonth';
 import { TradeSessionResponseDto } from './dto/trade-session-response';
 import { getTradeConfirmationWithTradeDetail } from 'src/helpers/trade/sql/getTradeConfirmWithTradeDetail';
 import { TradeConfirmationWithDetailDto } from './dto/trade-confirmation-with-detail.dto';
+import { getMarketDataSummaryHour } from 'src/helpers/trade/sql/getMarketDataSummaryHour';
 
 @Injectable()
 export class TradeService {
@@ -139,5 +140,18 @@ export class TradeService {
     tradebook.isStampBlock = true;
 
     return this.tradebookConfirmationRepository.save(tradebook);
+  }
+
+  async getMarketSummaryData(
+    timeframe = 'hour',
+  ): Promise<TradeSessionResponseDto[]> {
+    const sessionSqlMap = {
+      hour: getMarketDataSummaryHour,
+      // day: getSessionSqlDay,
+      // month: getSessionSqlMonth,
+    };
+    const sql = sessionSqlMap[timeframe];
+
+    return this.tradebookRepository.query(sql);
   }
 }
