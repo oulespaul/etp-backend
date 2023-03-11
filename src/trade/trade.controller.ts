@@ -56,76 +56,18 @@ export class TradeController {
   }
 
   @Get('/invoice/:accountNo')
-  async getInvoice(
+  async getInvoice(@Param('accountNo') accountNo: number) {
+    return this.invoiceService.getInvoiceData(accountNo);
+  }
+
+  @Get('/invoice/download/:accountNo')
+  async downloadInvoice(
     @Param('accountNo') accountNo: number,
     @Response() res: Res,
   ) {
-    const tradeMonthly = await this.tradeService.getMonthlyTradeConfirmation(
-      accountNo,
-    );
-    if (!tradeMonthly) {
-      throw new BadRequestException('Not found any trade confirmation');
-    }
+    const invoiceData = await this.invoiceService.getInvoiceData(accountNo);
 
-    const today = new Intl.DateTimeFormat('th-TH', {
-      dateStyle: 'full',
-      timeZone: 'Asia/Bangkok',
-    }).format(new Date());
-
-    const invoice = {
-      invoiceDate: today,
-      client: {
-        number: tradeMonthly.accountNo,
-      },
-      items: [
-        {
-          task: 'พลัังงานไฟฟ้าใช้งาน (หน่วย)',
-          quantity: formatNumber(tradeMonthly.trnUsage, 2),
-          amount: formatNumber(tradeMonthly.price, 2),
-        },
-        {
-          task: 'พลังงานไฟฟ้าจ่ายออก (หน่วย)',
-          quantity: formatNumber(tradeMonthly.trnUsage, 2),
-          amount: formatNumber(tradeMonthly.price, 2),
-        },
-        {
-          task: 'พลังงานไฟฟ้าสุทธิ (หน่วย)',
-          quantity: formatNumber(tradeMonthly.trnUsage, 2),
-          amount: formatNumber(tradeMonthly.price, 2),
-        },
-        {
-          task: 'ค่าบริการ (บาท)',
-          amount: formatNumber(100, 2),
-        },
-        {
-          task: 'รวมค่าไฟฟ้า (บาท)',
-          amount: formatNumber(tradeMonthly.price),
-        },
-        {
-          task: 'ภาษีมูลค่าเพิ่ม 7%',
-          amount: formatNumber(tradeMonthly.price * 0.07),
-        },
-        {
-          task: 'รวมเงินที่ต้องชำระ (บาท)',
-          amount: formatNumber(
-            Number(tradeMonthly.price) + tradeMonthly.price * 0.07 + 100,
-          ),
-        },
-      ],
-      histories: [
-        {
-          month: '',
-          amount1: formatNumber(0, 2),
-          amount2: formatNumber(0, 2),
-          amount3: formatNumber(0, 2),
-          amount4: formatNumber(0, 2),
-          amount5: formatNumber(0, 2),
-          amount6: formatNumber(0, 2),
-        },
-      ],
-    };
-
-    const buffer = await this.invoiceService.createInvoice(invoice);
+    const buffer = await this.invoiceService.createInvoice(invoiceData);
 
     res.set({
       'Content-Type': 'application/pdf',

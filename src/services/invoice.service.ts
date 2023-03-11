@@ -1,9 +1,83 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import PDFDocument from 'pdfkit-table';
+import { formatNumber } from 'src/helpers/numberFormet';
+import { TradeService } from 'src/trade/trade.service';
 
 @Injectable()
 export class InvoiceService {
+  constructor(private tradeService: TradeService) {}
+
   private readonly logger = new Logger(InvoiceService.name);
+
+  async getInvoiceData(accountNo: number) {
+    const tradeMonthly = await this.tradeService.getMonthlyTradeConfirmation(
+      accountNo,
+    );
+
+    if (!tradeMonthly) {
+      throw new BadRequestException('Not found any trade confirmation');
+    }
+
+    const today = new Intl.DateTimeFormat('th-TH', {
+      dateStyle: 'full',
+      timeZone: 'Asia/Bangkok',
+    }).format(new Date());
+
+    const invoice = {
+      invoiceDate: today,
+      client: {
+        number: tradeMonthly.accountNo,
+      },
+      items: [
+        {
+          task: 'พลังงานไฟฟ้าใช้งาน (หน่วย)',
+          quantity: formatNumber(tradeMonthly.trnUsage, 2),
+          value: formatNumber(tradeMonthly.value, 2),
+        },
+        {
+          task: 'พลังงานไฟฟ้าจ่ายออก (หน่วย)',
+          quantity: formatNumber(tradeMonthly.trnUsage, 2),
+          value: formatNumber(tradeMonthly.value, 2),
+        },
+        {
+          task: 'พลังงานไฟฟ้าสุทธิ (หน่วย)',
+          quantity: formatNumber(tradeMonthly.trnUsage, 2),
+          value: formatNumber(tradeMonthly.value, 2),
+        },
+        {
+          task: 'ค่าบริการ (บาท)',
+          value: formatNumber(100, 2),
+        },
+        {
+          task: 'รวมค่าไฟฟ้า (บาท)',
+          value: formatNumber(tradeMonthly.value),
+        },
+        {
+          task: 'ภาษีมูลค่าเพิ่ม 7%',
+          value: formatNumber(tradeMonthly.value * 0.07),
+        },
+        {
+          task: 'รวมเงินที่ต้องชำระ (บาท)',
+          value: formatNumber(
+            Number(tradeMonthly.value) + tradeMonthly.value * 0.07 + 100,
+          ),
+        },
+      ],
+      histories: [
+        {
+          month: '',
+          value1: formatNumber(0, 2),
+          value2: formatNumber(0, 2),
+          value3: formatNumber(0, 2),
+          value4: formatNumber(0, 2),
+          value5: formatNumber(0, 2),
+          value6: formatNumber(0, 2),
+        },
+      ],
+    };
+
+    return invoice;
+  }
 
   async createInvoice(invoice): Promise<Buffer> {
     const pdfBuffer: Buffer = await new Promise((resolve) => {
@@ -72,7 +146,7 @@ export class InvoiceService {
         },
         {
           label: 'จำนวนเงิน (บาท)',
-          property: 'amount',
+          property: 'value',
           width: 150,
           align: 'center',
         },

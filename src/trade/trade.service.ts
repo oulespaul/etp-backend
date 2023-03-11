@@ -109,7 +109,7 @@ export class TradeService {
       .createQueryBuilder('tc')
       .select('t.incoming_account_no', 'accountNo')
       .addSelect('SUM(tc.trn_usage)', 'trnUsage')
-      .addSelect('SUM(tc.trn_usage * t.price)', 'price')
+      .addSelect('SUM(tc.trn_usage * t.price)', 'value')
       .leftJoin('tradebook', 't', 'tc.tradebook_id = t.trade_id')
       .where('YEAR(tc.`timestamp`) = YEAR(NOW())')
       .andWhere('MONTH(tc.`timestamp`) = MONTH(NOW())')
