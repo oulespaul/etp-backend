@@ -74,43 +74,45 @@ export class EventGateway
         endOrderTime,
       );
 
-      orderbooks.forEach(async (orderbook) => {
-        if (quantityTmp == 0) return;
+      await Promise.all(
+        orderbooks.map(async (orderbook) => {
+          if (quantityTmp == 0) return;
 
-        const qtyLeft = orderbook.remainingQuantity - quantityTmp;
-        const isFullyExecuted = qtyLeft <= 0;
+          const qtyLeft = orderbook.remainingQuantity - quantityTmp;
+          const isFullyExecuted = qtyLeft <= 0;
 
-        quantityTmp = isFullyExecuted ? Math.abs(qtyLeft) : 0;
+          quantityTmp = isFullyExecuted ? Math.abs(qtyLeft) : 0;
 
-        await this.orderbookService.save({
-          ...orderbook,
-          remainingQuantity: isFullyExecuted ? 0 : qtyLeft,
-          status: isFullyExecuted ? 'fullyExecuted' : 'working',
-        });
+          await this.orderbookService.save({
+            ...orderbook,
+            remainingQuantity: isFullyExecuted ? 0 : qtyLeft,
+            status: isFullyExecuted ? 'fullyExecuted' : 'working',
+          });
 
-        const matchedQty = orderbook.remainingQuantity - qtyLeft;
+          const matchedQty = orderbook.remainingQuantity - qtyLeft;
 
-        const incomingOrder = await this.orderbookService.create({
-          ...data,
-          remainingQuantity: quantityTmp,
-          status: quantityTmp == 0 ? 'fullyExecuted' : 'working',
-        });
+          const incomingOrder = await this.orderbookService.create({
+            ...data,
+            remainingQuantity: quantityTmp,
+            status: quantityTmp == 0 ? 'fullyExecuted' : 'working',
+          });
 
-        await this.tradebokService.createTrade({
-          incomingAccountNo: data.accountNo,
-          bookOrderAccountNo: orderbook.accountNo,
-          bookOrderId: orderbook.order_id,
-          incomingOrderId: incomingOrder.order_id,
-          quantity: matchedQty,
-          price: orderbook.price,
-          tradeTime: incomingOrder.orderTime,
-          incomingOrderSide: data.side,
-          bookOrderSide: orderbook.side,
-          incomingOrderRemainingQuantity: quantityTmp,
-          bookOrderRemainingQuantity: isFullyExecuted ? 0 : qtyLeft,
-          status: 'Matched',
-        });
-      });
+          await this.tradebokService.createTrade({
+            incomingAccountNo: data.accountNo,
+            bookOrderAccountNo: orderbook.accountNo,
+            bookOrderId: orderbook.order_id,
+            incomingOrderId: incomingOrder.order_id,
+            quantity: matchedQty,
+            price: orderbook.price,
+            tradeTime: incomingOrder.orderTime,
+            incomingOrderSide: data.side,
+            bookOrderSide: orderbook.side,
+            incomingOrderRemainingQuantity: quantityTmp,
+            bookOrderRemainingQuantity: isFullyExecuted ? 0 : qtyLeft,
+            status: 'Matched',
+          });
+        }),
+      );
 
       if (orderbooks.length < 1) {
         await this.orderbookService.create({
@@ -124,8 +126,8 @@ export class EventGateway
       const endTime = dayjs().set('minute', 59).set('second', 59).toString();
       const sessions = await this.tradebokService.getSessionTrade();
 
-      this.server.emit('sessions', sessions);
-      this.getOrderbook({ startTime, endTime });
+      await this.getOrderbook({ startTime, endTime });
+      this.server.emit('sessions', JSON.stringify(sessions));
     } catch (err) {
       console.log('da: err', err);
       this.server.emit('newOrder', err.message);
@@ -142,6 +144,7 @@ export class EventGateway
         new Date(data.startTime),
         new Date(data.endTime),
       );
+      console.log('da: orderBooks', orderBooks);
       this.server.emit('orderBooks', JSON.stringify(orderBooks));
     } catch (err) {
       console.log('err.message', err.message);
