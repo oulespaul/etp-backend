@@ -54,12 +54,12 @@ export class InvoiceService {
         },
         {
           task: 'ภาษีมูลค่าเพิ่ม 7%',
-          value: formatNumber(tradeMonthly.value * 0.07),
+          value: formatNumber((tradeMonthly.value + 100) * 0.07),
         },
         {
           task: 'รวมเงินที่ต้องชำระ (บาท)',
           value: formatNumber(
-            Number(tradeMonthly.value) + tradeMonthly.value * 0.07 + 100,
+            Number(tradeMonthly.value + 100) + tradeMonthly.value * 0.07,
           ),
         },
       ],
