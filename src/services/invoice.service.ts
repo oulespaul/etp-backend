@@ -23,6 +23,9 @@ export class InvoiceService {
       timeZone: 'Asia/Bangkok',
     }).format(new Date());
 
+    const feeThb = (Number(tradeMonthly.value) + 100) * 0.07;
+    const valueIncludeFee = Number(tradeMonthly.value) + 100 + feeThb;
+
     const invoice = {
       invoiceDate: today,
       client: {
@@ -54,13 +57,11 @@ export class InvoiceService {
         },
         {
           task: 'ภาษีมูลค่าเพิ่ม 7%',
-          value: formatNumber((tradeMonthly.value + 100) * 0.07),
+          value: formatNumber(feeThb),
         },
         {
           task: 'รวมเงินที่ต้องชำระ (บาท)',
-          value: formatNumber(
-            Number(tradeMonthly.value + 100) + tradeMonthly.value * 0.07,
-          ),
+          value: formatNumber(valueIncludeFee),
         },
       ],
       histories: [
