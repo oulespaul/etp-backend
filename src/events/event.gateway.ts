@@ -89,7 +89,8 @@ export class EventGateway
             status: isFullyExecuted ? 'fullyExecuted' : 'working',
           });
 
-          const matchedQty = orderbook.remainingQuantity - qtyLeft;
+          const matchedQty =
+            orderbook.remainingQuantity - (isFullyExecuted ? 0 : qtyLeft);
 
           const incomingOrder = await this.orderbookService.create({
             ...data,
