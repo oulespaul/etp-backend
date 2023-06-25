@@ -15,7 +15,7 @@ import { LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
 import * as dayjs from 'dayjs';
 import { GetOrderbookDto } from 'src/order/dto/get-order.dto';
 import { TradeService } from 'src/trade/trade.service';
-@WebSocketGateway(3001, {
+@WebSocketGateway(3003, {
   cors: {
     origin: '*',
   },
