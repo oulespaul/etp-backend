@@ -4,7 +4,7 @@
   "port": 3306,
   "username": "root",
   "password": "etp-root",
-  "database": "etp",
+  "database": "etp-nectec",
   "entities": ["dist/**/*.entity{.ts,.js}"],
   "synchronize": true,
   "logging": false
