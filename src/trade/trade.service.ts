@@ -43,14 +43,14 @@ export class TradeService {
     confirmTrade: ComfirmTradebookDto,
   ): Promise<{ status: string; timestamp: Date }> {
     const tradeRefId = confirmTrade.refId.split('|')[0];
-    const tradeId = Number(tradeRefId.split('TB')[1]);
+    const tradeId = Number(tradeRefId.split('NTTB')[1]);
     const tradebook = await this.getTradeById(tradeId);
     if (tradebook === undefined) {
       throw new BadRequestException('refId not found');
     }
 
     const tradebookConfirmation = this.tradebookConfirmationRepository.create({
-      orderbookId: Number(confirmTrade.transactionId.split('OB')[1]),
+      orderbookId: Number(confirmTrade.transactionId.split('NTOB')[1]),
       tradebookId: tradeId,
       status: confirmTrade.status,
       trnUsage: confirmTrade.trnUsage,

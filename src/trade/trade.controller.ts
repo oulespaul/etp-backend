@@ -46,11 +46,11 @@ export class TradeController {
   async confirm(
     @Body() confirmDto: ComfirmTradebookDto,
   ): Promise<{ status: string; timestamp: Date }> {
-    if (!confirmDto.transactionId.startsWith('OB')) {
-      throw new BadRequestException('transactionId must be start with OB');
+    if (!confirmDto.transactionId.startsWith('NTOB')) {
+      throw new BadRequestException('transactionId must be start with NTOB');
     }
-    if (!confirmDto.refId.startsWith('TB')) {
-      throw new BadRequestException('transactionId must be start with TB');
+    if (!confirmDto.refId.startsWith('NTTB')) {
+      throw new BadRequestException('transactionId must be start with NTTB');
     }
     return this.tradeService.createTradeConfirmation(confirmDto);
   }
