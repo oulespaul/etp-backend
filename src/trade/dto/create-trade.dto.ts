@@ -1,8 +1,8 @@
 export class CreateTradebookDto {
   incomingAccountNo: string;
   bookOrderAccountNo: string;
-  bookOrderId: number;
-  incomingOrderId: number;
+  bookOrderId: string;
+  incomingOrderId: string;
   quantity: number;
   price: number;
   tradeTime: Date;
@@ -11,4 +11,5 @@ export class CreateTradebookDto {
   incomingOrderRemainingQuantity: number;
   bookOrderRemainingQuantity: number;
   status?: string;
+  isLocal?: boolean;
 }
