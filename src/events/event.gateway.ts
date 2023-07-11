@@ -55,8 +55,8 @@ export class EventGateway
       const side = data.side === 'buy' ? 'sell' : 'buy';
       const whereSide =
         side === 'buy'
-          ? MoreThanOrEqual(data.price)
-          : LessThanOrEqual(data.price);
+          ? LessThanOrEqual(data.price)
+          : MoreThanOrEqual(data.price);
       const startOrderTime = dayjs(data.orderTime)
         .set('minute', 0)
         .set('second', 0)
@@ -101,8 +101,8 @@ export class EventGateway
           await this.tradebokService.createTrade({
             incomingAccountNo: data.accountNo,
             bookOrderAccountNo: orderbook.accountNo,
-            bookOrderId: orderbook.order_id,
-            incomingOrderId: incomingOrder.order_id,
+            bookOrderId: orderbook.order_id.toString(),
+            incomingOrderId: incomingOrder.order_id.toString(),
             quantity: matchedQty,
             price: orderbook.price,
             tradeTime: incomingOrder.orderTime,

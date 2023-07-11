@@ -16,7 +16,7 @@ import { InvoiceService } from 'src/services/invoice.service';
 import { ComfirmTradebookDto } from './dto/confirm-trade.dto';
 import { TradeService } from './trade.service';
 import { Response as Res } from 'express';
-import { formatNumber } from 'src/helpers/numberFormet';
+import { CreateTradebookDto } from './dto/create-trade.dto';
 
 @Controller('/api/trade')
 @ApiTags('tradebook')
@@ -76,5 +76,11 @@ export class TradeController {
     });
 
     res.end(buffer);
+  }
+
+  // For global send trade manually
+  @Post()
+  createTradebook(@Body() createTradebookDto: CreateTradebookDto) {
+    return this.tradeService.createTrade(createTradebookDto);
   }
 }

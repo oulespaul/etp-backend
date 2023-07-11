@@ -52,22 +52,26 @@ export class TradeRequestService {
           return this.logger.debug(`TradeConfirmation taker is error`);
         }
 
-        const reqMaker = {
-          clientId: parseInt(trade.bookOrderAccountNo),
-          transactionDateTime: nextHour,
-          tradeType: trade.incomingOrderSide === 'buy' ? 20 : 10,
-          transactionId: `NTOB${trade.bookOrderId}`,
-          refId: `NTTB${trade.tradeId}|NTOB${trade.bookOrderId}`,
-          duration: 60,
-          volume: parseFloat(trade.quantity.toString()),
-          unitPrice: parseFloat(trade.price.toString()),
-        };
+        if (trade.isLocal) {
+          const reqMaker = {
+            clientId: parseInt(trade.bookOrderAccountNo),
+            transactionDateTime: nextHour,
+            tradeType: trade.incomingOrderSide === 'buy' ? 20 : 10,
+            transactionId: `NTOB${trade.bookOrderId}`,
+            refId: `NTTB${trade.tradeId}|NTOB${trade.bookOrderId}`,
+            duration: 60,
+            volume: parseFloat(trade.quantity.toString()),
+            unitPrice: parseFloat(trade.price.toString()),
+          };
 
-        const resultMaker = await this.espService.tradeRequest(reqMaker);
+          const resultMaker = await this.espService.tradeRequest(reqMaker);
 
-        if (resultMaker && resultMaker.data) {
-          this.tradeService.updateTradeRequested(trade.tradeId);
+          if (!resultMaker) {
+            return this.logger.debug(`TradeConfirmation maker is error`);
+          }
         }
+
+        this.tradeService.updateTradeRequested(trade.tradeId);
       }),
     );
   }

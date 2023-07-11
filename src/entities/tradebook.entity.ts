@@ -17,10 +17,10 @@ export class Tradebook {
   bookOrderAccountNo: string;
 
   @Column({ name: 'book_order_id' })
-  bookOrderId: number;
+  bookOrderId: string;
 
   @Column({ name: 'incoming_order_id' })
-  incomingOrderId: number;
+  incomingOrderId: string;
 
   @Column({ name: 'quantity', type: 'decimal', precision: 10, scale: 2 })
   quantity: number;
@@ -45,6 +45,9 @@ export class Tradebook {
 
   @Column({ name: 'status' })
   status: string;
+
+  @Column({ name: 'is_local', default: true })
+  isLocal: boolean;
 
   @Column({ name: 'is_trade_requested' })
   isTradeRequest: boolean;
