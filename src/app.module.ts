@@ -12,6 +12,7 @@ import { ESPService } from './services/esp.service';
 import { HttpModule } from '@nestjs/axios';
 import { UserModule } from './user/user.module';
 import { BlockchainService } from './services/blockchain.service';
+import { GlobalTradeService } from './services/global-trade.service';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { BlockchainService } from './services/blockchain.service';
     TradeRequestService,
     ESPService,
     BlockchainService,
+    GlobalTradeService,
   ],
 })
 export class AppModule {}

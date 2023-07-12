@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Cron } from '@nestjs/schedule';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import * as dayjs from 'dayjs';
 import { Between } from 'typeorm';
 import { TradeService } from 'src/trade/trade.service';
@@ -16,7 +16,7 @@ export class TradeRequestService {
 
   private readonly logger = new Logger(TradeRequestService.name);
 
-  @Cron('50 * * * * *')
+  @Cron(CronExpression.EVERY_MINUTE)
   async handleCron() {
     const startCurHour = dayjs().set('minute', 0).set('second', 0).toString();
     const endCurHour = dayjs().set('minute', 59).set('second', 59).toString();
@@ -35,9 +35,11 @@ export class TradeRequestService {
 
     await Promise.all(
       trades.map(async (trade) => {
+        const tradeTime = trade.isLocal ? nextHour : trade.tradeTime.toString();
+
         const reqTaker = {
           clientId: parseInt(trade.incomingAccountNo),
-          transactionDateTime: nextHour,
+          transactionDateTime: tradeTime,
           tradeType: trade.incomingOrderSide === 'buy' ? 10 : 20,
           transactionId: `NTOB${trade.incomingOrderId}`,
           refId: `NTTB${trade.tradeId}|NTOB${trade.incomingOrderId}`,
