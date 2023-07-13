@@ -154,4 +154,12 @@ export class TradeService {
 
     return this.tradebookRepository.query(sql);
   }
+
+  async getTradeHistoryByAccountNo(accountNo: number): Promise<Tradebook[]> {
+    return this.tradebookRepository.find({
+      where: {
+        incomingAccountNo: accountNo,
+      },
+    });
+  }
 }

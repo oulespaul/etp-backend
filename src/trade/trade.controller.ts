@@ -83,4 +83,9 @@ export class TradeController {
   createTradebook(@Body() createTradebookDto: CreateTradebookDto) {
     return this.tradeService.createTrade(createTradebookDto);
   }
+
+  @Get('/:accountNo')
+  async getTradeHistory(@Param('accountNo') accountNo: number) {
+    return this.tradeService.getTradeHistoryByAccountNo(accountNo);
+  }
 }
