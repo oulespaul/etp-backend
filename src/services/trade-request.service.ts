@@ -5,6 +5,8 @@ import { Between } from 'typeorm';
 import { TradeService } from 'src/trade/trade.service';
 import { ESPService } from './esp.service';
 import { BlockchainService } from './blockchain.service';
+import { MAKER_TAKER } from 'src/constants/maker-taker.enum';
+import { TradeRequestDto } from 'src/trade/dto/trade-request.dto';
 
 @Injectable()
 export class TradeRequestService {
@@ -16,17 +18,19 @@ export class TradeRequestService {
 
   private readonly logger = new Logger(TradeRequestService.name);
 
+  // For send trade request (local)
   @Cron(CronExpression.EVERY_MINUTE)
   async handleCron() {
     const startCurHour = dayjs().set('minute', 0).set('second', 0).toString();
     const endCurHour = dayjs().set('minute', 59).set('second', 59).toString();
-    const nextHour = dayjs().add(1, 'hour').format('YYYYMMDDHH0000');
+
     this.logger.debug(
       `Starting trade request from ${startCurHour} to ${endCurHour}`,
     );
 
     const trades = await this.tradeService.findTradeByDateRange(
       Between(new Date(startCurHour), new Date(endCurHour)),
+      true,
     );
 
     if (trades.length === 0) {
@@ -35,18 +39,7 @@ export class TradeRequestService {
 
     await Promise.all(
       trades.map(async (trade) => {
-        const tradeTime = trade.isLocal ? nextHour : trade.tradeTime.toString();
-
-        const reqTaker = {
-          clientId: parseInt(trade.incomingAccountNo),
-          transactionDateTime: tradeTime,
-          tradeType: trade.incomingOrderSide === 'buy' ? 10 : 20,
-          transactionId: `OB${trade.incomingOrderId}`,
-          refId: `TB${trade.tradeId}|OB${trade.incomingOrderId}`,
-          duration: 60,
-          volume: parseFloat(trade.quantity.toString()),
-          unitPrice: parseFloat(trade.price.toString()),
-        };
+        const reqTaker = TradeRequestDto.toModel(trade, MAKER_TAKER.TAKER);
 
         const resultTaker = await this.espService.tradeRequest(reqTaker);
 
@@ -54,23 +47,12 @@ export class TradeRequestService {
           return this.logger.debug(`TradeConfirmation taker is error`);
         }
 
-        if (trade.isLocal) {
-          const reqMaker = {
-            clientId: parseInt(trade.bookOrderAccountNo),
-            transactionDateTime: nextHour,
-            tradeType: trade.incomingOrderSide === 'buy' ? 20 : 10,
-            transactionId: `OB${trade.bookOrderId}`,
-            refId: `TB${trade.tradeId}|OB${trade.bookOrderId}`,
-            duration: 60,
-            volume: parseFloat(trade.quantity.toString()),
-            unitPrice: parseFloat(trade.price.toString()),
-          };
+        const reqMaker = TradeRequestDto.toModel(trade, MAKER_TAKER.MAKER);
 
-          const resultMaker = await this.espService.tradeRequest(reqMaker);
+        const resultMaker = await this.espService.tradeRequest(reqMaker);
 
-          if (!resultMaker) {
-            return this.logger.debug(`TradeConfirmation maker is error`);
-          }
+        if (!resultMaker) {
+          return this.logger.debug(`TradeConfirmation maker is error`);
         }
 
         this.tradeService.updateTradeRequested(trade.tradeId);
@@ -78,7 +60,7 @@ export class TradeRequestService {
     );
   }
 
-  @Cron('*/5 * * * * *')
+  @Cron(CronExpression.EVERY_5_MINUTES)
   async handleStampToBlockchainCron() {
     this.logger.debug(`Starting stamp blockchain`);
 

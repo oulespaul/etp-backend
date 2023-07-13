@@ -15,7 +15,7 @@ export class ClearingOrderTaskService {
 
   private readonly logger = new Logger(ClearingOrderTaskService.name);
 
-  @Cron('0 56 * * * *') // At second :00 of minute :56 of every hour
+  @Cron('0 55 * * * *') // At second :00 of minute :55 of every hour
   async handleGlobalTradeCron() {
     const curHour = dayjs().set('minute', 55).set('second', 0).toString();
 
@@ -39,7 +39,7 @@ export class ClearingOrderTaskService {
     this.logger.debug(`Cleared ${orders.length} order`);
   }
 
-  @Cron('0 55 * * * *') // At second :00 of minute :55 of every hour
+  @Cron('0 48 * * * *') // At second :00 of minute :48 of every hour
   async handleClearOrderCron() {
     const curHour = dayjs()
       .subtract(1, 'hour')
