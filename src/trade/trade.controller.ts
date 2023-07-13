@@ -17,6 +17,9 @@ import { ComfirmTradebookDto } from './dto/confirm-trade.dto';
 import { TradeService } from './trade.service';
 import { Response as Res } from 'express';
 import { CreateTradebookDto } from './dto/create-trade.dto';
+import { ESPService } from 'src/services/esp.service';
+import { TradeRequestDto } from './dto/trade-request.dto';
+import { MAKER_TAKER } from 'src/constants/maker-taker.enum';
 
 @Controller('/api/trade')
 @ApiTags('tradebook')
@@ -24,6 +27,7 @@ export class TradeController {
   constructor(
     private tradeService: TradeService,
     private invoiceService: InvoiceService,
+    private espService: ESPService,
   ) {}
 
   @Get('/all')
@@ -80,8 +84,18 @@ export class TradeController {
 
   // For global send trade manually
   @Post()
-  createTradebook(@Body() createTradebookDto: CreateTradebookDto) {
-    return this.tradeService.createTrade(createTradebookDto);
+  async createTradebook(@Body() createTradebookDto: CreateTradebookDto) {
+    const tradeStamped = await this.tradeService.createTrade(
+      createTradebookDto,
+    );
+
+    const reqTaker = TradeRequestDto.toModel(tradeStamped, MAKER_TAKER.TAKER);
+
+    await this.espService.tradeRequest(reqTaker);
+
+    await this.tradeService.updateTradeRequested(tradeStamped.tradeId);
+
+    return tradeStamped;
   }
 
   @Get('/:accountNo')

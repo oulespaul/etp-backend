@@ -70,11 +70,13 @@ export class TradeService {
 
   async findTradeByDateRange(
     dateRange: FindOperator<Date>,
+    isLocal: boolean,
   ): Promise<Tradebook[]> {
     return this.tradebookRepository.find({
       where: {
         isTradeRequest: false,
         tradeTime: dateRange,
+        isLocal,
       },
     });
   }
