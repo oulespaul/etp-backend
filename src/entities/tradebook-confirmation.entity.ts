@@ -14,10 +14,10 @@ export class TradebookConfirmation {
   @Column({ name: 'status' })
   status: string;
 
-  @Column({ name: 'trn_usage' })
+  @Column({ name: 'trn_usage', type: 'decimal', precision: 20, scale: 8 })
   trnUsage: number;
 
-  @Column({ name: 'total' })
+  @Column({ name: 'total', type: 'decimal', precision: 20, scale: 8 })
   total: number;
 
   @Column({ name: 'timestamp' })

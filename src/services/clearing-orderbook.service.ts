@@ -35,6 +35,7 @@ export class ClearingOrderTaskService {
 
     await this.globalTradeService.orderRequest(orderGlobalTradeRequests);
 
+    // TODO: update order status to global working
     this.logger.debug(`Cleared ${orders.length} order`);
   }
 
