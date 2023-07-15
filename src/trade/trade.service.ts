@@ -110,13 +110,26 @@ export class TradeService {
     return this.tradebookConfirmationRepository
       .createQueryBuilder('tc')
       .select('t.incoming_account_no', 'accountNo')
-      .addSelect('SUM(tc.trn_usage)', 'trnUsage')
-      .addSelect('SUM(tc.trn_usage * t.price)', 'value')
+      .addSelect(
+        'ABS(SUM(IF(t.incoming_order_side = "buy",tc.trn_usage,0)))',
+        'trnUsageBuy',
+      )
+      .addSelect(
+        'ABS(SUM(IF(t.incoming_order_side = "buy",tc.total,0)))',
+        'valueBuy',
+      )
+      .addSelect(
+        'ABS(SUM(IF(t.incoming_order_side = "sell",tc.trn_usage,0)))',
+        'trnUsageSell',
+      )
+      .addSelect(
+        'ABS(SUM(IF(t.incoming_order_side = "sell",tc.total,0)))',
+        'valueSell',
+      )
       .leftJoin('tradebook', 't', 'tc.tradebook_id = t.trade_id')
       .where('YEAR(tc.`timestamp`) = YEAR(NOW())')
       .andWhere('MONTH(tc.`timestamp`) = MONTH(NOW())')
       .andWhere('t.incoming_account_no = :accountNo', { accountNo })
-      .groupBy('t.incoming_account_no')
       .getRawOne();
   }
 

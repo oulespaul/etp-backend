@@ -23,8 +23,16 @@ export class InvoiceService {
       timeZone: 'Asia/Bangkok',
     }).format(new Date());
 
-    const feeThb = (Number(tradeMonthly.value) + 100) * 0.07;
-    const valueIncludeFee = Number(tradeMonthly.value) + 100 + feeThb;
+    // Sell
+    const connectedTransferFee = Number(tradeMonthly.trnUsageSell) * 1.151;
+    const totalSell = Number(tradeMonthly.valueSell) + connectedTransferFee;
+
+    // Buy
+    const totalBuy = Number(tradeMonthly.valueBuy);
+
+    const total = totalSell + totalBuy;
+    const feeThb = Number(total) * 0.07;
+    const valueIncludeFee = Number(total) + feeThb;
 
     const invoice = {
       invoiceDate: today,
@@ -33,34 +41,60 @@ export class InvoiceService {
       },
       items: [
         {
-          task: 'พลังงานไฟฟ้าใช้งาน (หน่วย)',
-          quantity: formatNumber(tradeMonthly.trnUsage, 2),
-          value: formatNumber(tradeMonthly.value, 2),
+          task: 'พลังงานไฟฟ้าที่ขาย',
+          quantity: formatNumber(tradeMonthly.trnUsageSell, 2),
+          value: formatNumber(tradeMonthly.valueSell, 2),
         },
         {
-          task: 'พลังงานไฟฟ้าจ่ายออก (หน่วย)',
-          quantity: formatNumber(tradeMonthly.trnUsage, 2),
-          value: formatNumber(tradeMonthly.value, 2),
+          task: 'ค่าเชื่อมระบบสายส่ง',
+          quantity: formatNumber(tradeMonthly.trnUsageSell, 2),
+          value: formatNumber(connectedTransferFee, 2), // 1.151/unit
         },
         {
-          task: 'พลังงานไฟฟ้าสุทธิ (หน่วย)',
-          quantity: formatNumber(tradeMonthly.trnUsage, 2),
-          value: formatNumber(tradeMonthly.value, 2),
+          task: 'รวมจำนวนเงิน',
+          quantity: ' ',
+          value: formatNumber(totalSell, 2),
         },
         {
-          task: 'ค่าบริการ (บาท)',
-          value: formatNumber(100, 2),
+          task: 'พลังงานไฟฟ้าที่ซื้อ',
+          quantity: formatNumber(tradeMonthly.trnUsageBuy, 2),
+          value: formatNumber(tradeMonthly.valueBuy, 2),
         },
         {
-          task: 'รวมค่าไฟฟ้า (บาท)',
-          value: formatNumber(tradeMonthly.value),
+          task: 'รวมจำนวนเงิน',
+          quantity: ' ',
+          value: formatNumber(totalBuy, 2),
+        },
+        {
+          task: 'พลังงานไฟฟ้าที่ใช้จากการไฟฟ้า',
+          quantity: ' ',
+          value: formatNumber(0, 2),
+        },
+        {
+          task: 'ค่าบริการ',
+          quantity: ' ',
+          value: formatNumber(0, 2), // 24.62 / unit
+        },
+        {
+          task: 'ค่า FT',
+          quantity: ' ',
+          value: formatNumber(0, 2), // .91 / unit
+        },
+        {
+          task: 'รวมจำนวนเงิน',
+          quantity: ' ',
+          value: formatNumber(0, 2),
+        },
+        {
+          task: 'รวมค่าพลังงานไฟฟ้าสุทธิ',
+          value: formatNumber(total),
         },
         {
           task: 'ภาษีมูลค่าเพิ่ม 7%',
           value: formatNumber(feeThb),
         },
         {
-          task: 'รวมเงินที่ต้องชำระ (บาท)',
+          task: 'รวมเงินที่ต้องชำระ',
           value: formatNumber(valueIncludeFee),
         },
       ],
@@ -86,7 +120,7 @@ export class InvoiceService {
 
       this.generateCustomerInformation(doc, invoice);
       this.generateInvoiceTable(doc, invoice);
-      this.generateHistoryTable(doc, invoice);
+      // this.generateHistoryTable(doc, invoice);
 
       doc.end();
 
@@ -140,7 +174,7 @@ export class InvoiceService {
       headers: [
         { label: 'รายการ', property: 'task', width: 200, align: 'center' },
         {
-          label: 'กิโลวัตต์หน่วย',
+          label: 'จำนวนที่ใช้ (หน่วย : kWh)',
           property: 'quantity',
           width: 150,
           align: 'center',
