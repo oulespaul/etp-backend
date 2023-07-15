@@ -130,7 +130,7 @@ export class EventGateway
       await this.getOrderbook({ startTime, endTime });
       this.server.emit('sessions', JSON.stringify(sessions));
     } catch (err) {
-      console.log('da: err', err);
+      this.logger.error('sendOrder error', err);
       this.server.emit('newOrder', err.message);
     }
   }
@@ -145,10 +145,10 @@ export class EventGateway
         new Date(data.startTime),
         new Date(data.endTime),
       );
-      console.log('da: orderBooks', orderBooks);
+
       this.server.emit('orderBooks', JSON.stringify(orderBooks));
     } catch (err) {
-      console.log('err.message', err.message);
+      this.logger.log('getOrderbook error: ', err.message);
       this.server.emit('orderBooks', err.message);
     }
   }
