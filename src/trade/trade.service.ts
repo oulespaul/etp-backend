@@ -130,6 +130,7 @@ export class TradeService {
       .where('YEAR(tc.`timestamp`) = YEAR(NOW())')
       .andWhere('MONTH(tc.`timestamp`) = MONTH(NOW())')
       .andWhere('t.incoming_account_no = :accountNo', { accountNo })
+      .orWhere('t.book_order_account_no = :accountNo', { accountNo })
       .getRawOne();
   }
 
