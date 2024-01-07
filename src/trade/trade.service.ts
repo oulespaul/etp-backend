@@ -172,9 +172,10 @@ export class TradeService {
 
   async getTradeHistoryByAccountNo(accountNo: number): Promise<Tradebook[]> {
     return this.tradebookRepository.find({
-      where: {
-        incomingAccountNo: accountNo,
-      },
+      where: [
+        { incomingAccountNo: accountNo },
+        { bookOrderAccountNo: accountNo },
+      ],
     });
   }
 }
